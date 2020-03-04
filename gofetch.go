@@ -9,12 +9,19 @@ import (
     "strings"
 )
 
+var debug bool = true
 var osName string
+
+func printDebug(str string) {
+    if debug == true {
+        fmt.Println(str)
+    }
+}
 
 func openNewReader(filename string) (error, *bufio.Reader, *os.File) {
     file, err := os.Open(filename)
     if err != nil {
-        fmt.Println("OOF")
+        printDebug(err.Error())
         return err, nil, nil
     }
 
@@ -24,6 +31,9 @@ func openNewReader(filename string) (error, *bufio.Reader, *os.File) {
 func _getOsName() string {
     if osName == "" {
         err, reader, file := openNewReader("/etc/os-release")
+        if err != nil {
+            return ""
+        }
         defer file.Close()
 
         // Skip 'NAME="'
@@ -45,18 +55,21 @@ func getOsName(channel chan string) {
 
 func getUptime(channel chan string) {
     err, reader, file := openNewReader("/proc/uptime")
+    if err != nil {
+        return
+    }
     defer file.Close()
 
     fileBs, err := reader.ReadBytes(' ')
     if err != nil {
-        fmt.Println("oof sound")
+        printDebug(err.Error())
         return
     }
 
     // Remove space and milliseconds
     uptime, err := strconv.Atoi(string(fileBs[:len(fileBs) - 4]))
     if err != nil {
-        fmt.Println("oof sound")
+        printDebug(err.Error())
         return
     }
 
@@ -98,7 +111,10 @@ func getUptime(channel chan string) {
 }
 
 func getKernelVersion(channel chan string) {
-    _, reader,  file := openNewReader("/proc/version")
+    err, reader, file := openNewReader("/proc/version")
+    if err != nil {
+        return
+    }
     defer file.Close()
 
     var versionSlice []byte
