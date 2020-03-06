@@ -14,6 +14,7 @@ var debug bool = true
 var osName string
 var infoSlice [6]string
 var infoSliceIter int
+var ascii [5]string
 
 func printDebug(str string) {
     if debug == true {
@@ -225,6 +226,18 @@ func getCpuName() {
     infoSlice[5] = "CPU: " + newCpuName
 }
 
+func getAsciiLogo() []string {
+    ascii := make([]string, 0)
+
+    ascii = append(ascii, "    /\\")
+    ascii = append(ascii, "   /  \\")
+    ascii = append(ascii, "  / /\\ \\")
+    ascii = append(ascii, " / ____ \\")
+    ascii = append(ascii, "/_/    \\_\\")
+
+    return ascii
+}
+
 func main() {
     go getUptime()
     go getOsName()
@@ -233,15 +246,42 @@ func main() {
     go getPackages()
     go getCpuName()
 
+    var printBuffer string
+
+    ascii := getAsciiLogo()
+
     for {
         if len(infoSlice) == infoSliceIter {
             break
         }
     }
 
+    // Filter out empty items
+    validInfos := make([]string, 0)
     for i := 0; i < len(infoSlice); i++ {
         if infoSlice[i] != "" {
-            fmt.Println(infoSlice[i])
+            validInfos = append(validInfos, infoSlice[i])
         }
+    }
+
+    // Get longest ASCII line for info spacers
+    var longestAsciiLine int
+    for i := 0; i < len(ascii); i++ {
+        if len(ascii[i]) > longestAsciiLine {
+            longestAsciiLine = len(ascii[i])
+        }
+    }
+    infoSpacer := longestAsciiLine + 2
+
+    var spaces int
+    for i := 0; i < len(validInfos); i++ {
+        if i < len(ascii) {
+            spaces = infoSpacer - len(ascii[i])
+            printBuffer = ascii[i] + strings.Repeat(" ", spaces) + validInfos[i]
+        } else {
+            printBuffer = strings.Repeat(" ", infoSpacer) + validInfos[i]
+        }
+
+        fmt.Println(printBuffer)
     }
 }
