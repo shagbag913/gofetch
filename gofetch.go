@@ -183,20 +183,14 @@ func getPackages() {
     var packagesString string
     var err error
 
-    switch _getOsName() {
-    case "Arch Linux":
-        packagesList, err = exec.Command("pacman", "-Q", "-q").Output()
-        if err != nil {
-            break
-        }
+    packagesList, err = exec.Command("pacman", "-Q", "-q").Output()
+    if err == nil {
         numPackages = strings.Count(string(packagesList), "\n")
         packagesString = packagesString + strconv.Itoa(numPackages) + " (pacman) "
-        fallthrough
-    case "Ubuntu":
-        packagesList, err = exec.Command("dpkg", "--list").Output()
-        if err != nil {
-            break
-        }
+    }
+
+    packagesList, err = exec.Command("dpkg", "--list").Output()
+    if err == nil {
         numPackages = strings.Count(string(packagesList), "\n")
         packagesString = packagesString + strconv.Itoa(numPackages) + " (dpkg) "
     }
