@@ -8,6 +8,7 @@ import (
     "regexp"
     "strconv"
     "strings"
+    "time"
 )
 
 var debug bool = true
@@ -69,24 +70,41 @@ func getOsName() {
 
 func getUptime() {
     defer iterateInfoSliceNum()
+
+    var uptime int
+
     err, reader, file := openNewReader("/proc/uptime")
     if err != nil {
         printDebug(err.Error())
-        return
-    }
-    defer file.Close()
 
-    fileBs, err := reader.ReadBytes(' ')
-    if err != nil {
-        printDebug(err.Error())
-        return
-    }
+        // Try to get uptime another way (SELinux)
+        uptimeSinceBoot, err := exec.Command("uptime", "-s").Output()
+        if err != nil {
+            return
+        }
 
-    // Remove space and milliseconds
-    uptime, err := strconv.Atoi(string(fileBs[:len(fileBs) - 4]))
-    if err != nil {
-        printDebug(err.Error())
-        return
+        uptimeSinceBootString := string(uptimeSinceBoot[:len(uptimeSinceBoot)-1])
+
+        timeSinceBoot, err := time.Parse("2006-01-02 15:04:05", uptimeSinceBootString)
+        if err != nil {
+            return
+        }
+
+        uptime = int(time.Now().Unix() - timeSinceBoot.Unix())
+    } else {
+        fileBs, err := reader.ReadBytes(' ')
+        file.Close()
+        if err != nil {
+            printDebug(err.Error())
+            return
+        }
+
+        // Remove space and milliseconds
+        uptime, err = strconv.Atoi(string(fileBs[:len(fileBs) - 4]))
+        if err != nil {
+            printDebug(err.Error())
+            return
+        }
     }
 
     years := uptime / (60 * 60 * 60 * 24 * 365)
