@@ -24,7 +24,6 @@ func printDebug(str string) {
 func openNewReader(filename string) (error, *bufio.Reader, *os.File) {
     file, err := os.Open(filename)
     if err != nil {
-        printDebug(err.Error())
         return err, nil, nil
     }
 
@@ -39,6 +38,7 @@ func _getOsName() string {
     if osName == "" {
         err, reader, file := openNewReader("/etc/os-release")
         if err != nil {
+            printDebug(err.Error())
             return ""
         }
         defer file.Close()
@@ -47,7 +47,7 @@ func _getOsName() string {
         file.Seek(6, 0)
         fileBs, err := reader.ReadBytes('"')
         if err != nil {
-            fmt.Println("oof sound")
+            printDebug(err.Error())
             return ""
         }
 
@@ -58,13 +58,16 @@ func _getOsName() string {
 
 func getOsName() {
     defer iterateInfoSliceNum()
-    infoSlice[0] = "OS: " +  _getOsName()
+    if _getOsName() != "" {
+        infoSlice[0] = "OS: " +  _getOsName()
+    }
 }
 
 func getUptime() {
     defer iterateInfoSliceNum()
     err, reader, file := openNewReader("/proc/uptime")
     if err != nil {
+        printDebug(err.Error())
         return
     }
     defer file.Close()
