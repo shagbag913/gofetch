@@ -5,6 +5,7 @@ import (
     "os"
     "os/exec"
     "bufio"
+    "regexp"
     "strconv"
     "strings"
 )
@@ -111,30 +112,21 @@ func getUptime(channel chan string) {
 }
 
 func getKernelVersion(channel chan string) {
-    err, reader, file := openNewReader("/proc/version")
+    file, err := os.Open("/proc/version")
     if err != nil {
         return
     }
     defer file.Close()
 
-    var versionSlice []byte
-    firstNumFound := false
-    for {
-        vByte, _ := reader.ReadByte()
-        vString := string(vByte)
-        if firstNumFound == false {
-            _, err := strconv.Atoi(vString)
-            if err != nil {
-                continue
-            }
-            firstNumFound = true
-        }
-        if vString == " " {
-            break
-        }
-        versionSlice = append(versionSlice, vByte)
-        file.Seek(1, 0)
+    kVersion := make([]byte, 100)
+    file.Read(kVersion)
+
+    kRegex, err := regexp.Compile(`[0-9].+?\s`)
+    if err != nil {
+        return
     }
+
+    versionSlice := kRegex.Find([]byte(kVersion))
 
     channel <- "Kernel: " + string(versionSlice)
 }
