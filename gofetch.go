@@ -16,6 +16,9 @@ var infoSlice [6]string
 var infoSliceIter int
 var ascii [5]string
 
+var colorBrightWhite string = "\u001b[37;1m"
+var colorBrightBlue string = "\u001b[34;1m"
+
 func printDebug(str string) {
     if debug == true {
         fmt.Println(str)
@@ -60,7 +63,7 @@ func _getOsName() string {
 func getOsName() {
     defer iterateInfoSliceNum()
     if _getOsName() != "" {
-        infoSlice[0] = "OS: " +  _getOsName()
+        infoSlice[0] = "OS: " +  colorBrightWhite + _getOsName()
     }
 }
 
@@ -120,7 +123,7 @@ func getUptime() {
     }
     finalTimeString = finalTimeString[:len(finalTimeString) - 2]
 
-    infoSlice[3] = "Uptime: " + finalTimeString
+    infoSlice[3] = "Uptime: " + colorBrightWhite + finalTimeString
 }
 
 func getKernelVersion() {
@@ -141,7 +144,7 @@ func getKernelVersion() {
 
     versionSlice := kRegex.Find([]byte(kVersion))
 
-    infoSlice[1] = "Kernel: " + string(versionSlice)
+    infoSlice[1] = "Kernel: " + colorBrightWhite + string(versionSlice)
 }
 
 func getShell() {
@@ -149,9 +152,9 @@ func getShell() {
     shell := os.Getenv("SHELL")
     version, err := exec.Command(shell, "--version").Output()
     if err != nil {
-        infoSlice[2] = "Shell: " + shell
+        infoSlice[2] = "Shell: " + colorBrightWhite + shell
     } else {
-        infoSlice[2] = "Shell: " + string(version[:len(version)-1])
+        infoSlice[2] = "Shell: " + colorBrightWhite + string(version[:len(version)-1])
     }
 }
 
@@ -181,7 +184,7 @@ func getPackages() {
     }
 
     if packagesString != "" {
-        infoSlice[4] = "Packages: " + packagesString
+        infoSlice[4] = "Packages: " + colorBrightWhite + packagesString
     }
 }
 
@@ -223,7 +226,7 @@ func getCpuName() {
     // Add core count
     newCpuName += " (" + strconv.Itoa(coreCount) + ")"
 
-    infoSlice[5] = "CPU: " + newCpuName
+    infoSlice[5] = "CPU: " + colorBrightWhite + newCpuName
 }
 
 func getAsciiLogo() []string {
@@ -277,9 +280,9 @@ func main() {
     for i := 0; i < len(validInfos); i++ {
         if i < len(ascii) {
             spaces = infoSpacer - len(ascii[i])
-            printBuffer = ascii[i] + strings.Repeat(" ", spaces) + validInfos[i]
+            printBuffer = colorBrightBlue + ascii[i] + strings.Repeat(" ", spaces) + validInfos[i]
         } else {
-            printBuffer = strings.Repeat(" ", infoSpacer) + validInfos[i]
+            printBuffer = colorBrightBlue + strings.Repeat(" ", infoSpacer) + validInfos[i]
         }
 
         fmt.Println(printBuffer)
