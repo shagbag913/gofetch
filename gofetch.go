@@ -12,7 +12,7 @@ import (
 
 var debug bool = true
 var osName string
-var infoSlice [5]string
+var infoSlice [6]string
 var infoSliceIter int
 
 func printDebug(str string) {
@@ -184,12 +184,63 @@ func getPackages() {
     }
 }
 
+func getCpuName() {
+    defer iterateInfoSliceNum()
+
+    var coreCount int
+    var cpuName string
+
+    file, err := os.Open("/proc/cpuinfo")
+    if err != nil {
+        printDebug(err.Error())
+        return
+    }
+    defer file.Close()
+
+    scanner := bufio.NewScanner(file)
+
+    for scanner.Scan() {
+        if len(scanner.Text()) > 9 && scanner.Text()[:10] == "model name" {
+            if coreCount == 0 {
+                cpuName = scanner.Text()[13:]
+            }
+            coreCount++
+        }
+    }
+    if cpuName == "" {
+        return
+    }
+
+    // Remove consecutive spaces from CPU name
+    var newCpuName string
+    var space int
+    for i := 0; i < len(cpuName); i++ {
+        if cpuName[i] == ' ' {
+            space++
+        } else {
+            space = 0
+        }
+        if space <= 1 {
+            newCpuName += string(cpuName[i])
+        }
+    }
+
+    // Remove (R) from CPU name
+    newCpuName = strings.ReplaceAll(newCpuName, "(R)", "")
+
+    // Add core count
+    newCpuName += " (" + strconv.Itoa(coreCount) + ")"
+
+    infoSlice[5] = "CPU: " + newCpuName
+}
+
 func main() {
     go getUptime()
     go getOsName()
     go getKernelVersion()
     go getShell()
     go getPackages()
+    go getCpuName()
 
     for {
         if len(infoSlice) == infoSliceIter {
