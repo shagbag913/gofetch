@@ -277,14 +277,16 @@ func main() {
     infoSpacer := longestAsciiLine + 2
 
     var spaces int
+    fmt.Println("")
     for i := 0; i < len(validInfos); i++ {
         if i < len(ascii) {
             spaces = infoSpacer - len(ascii[i])
-            printBuffer = colorBrightBlue + ascii[i] + strings.Repeat(" ", spaces) + validInfos[i]
+            printBuffer = "  " + colorBrightBlue + ascii[i] + strings.Repeat(" ", spaces) + validInfos[i]
         } else {
-            printBuffer = colorBrightBlue + strings.Repeat(" ", infoSpacer) + validInfos[i]
+            printBuffer = "  " + colorBrightBlue + strings.Repeat(" ", infoSpacer) + validInfos[i]
         }
 
         fmt.Println(printBuffer)
     }
+    fmt.Println("")
 }
