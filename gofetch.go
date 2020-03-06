@@ -12,6 +12,8 @@ import (
 
 var debug bool = true
 var osName string
+var infoSlice [5]string
+var infoSliceIter int
 
 func printDebug(str string) {
     if debug == true {
@@ -27,6 +29,10 @@ func openNewReader(filename string) (error, *bufio.Reader, *os.File) {
     }
 
     return err, bufio.NewReader(file), file
+}
+
+func iterateInfoSliceNum() {
+    infoSliceIter++
 }
 
 func _getOsName() string {
@@ -50,11 +56,13 @@ func _getOsName() string {
     return osName
 }
 
-func getOsName(channel chan string) {
-    channel <- "OS: " +  _getOsName()
+func getOsName() {
+    defer iterateInfoSliceNum()
+    infoSlice[0] = "OS: " +  _getOsName()
 }
 
-func getUptime(channel chan string) {
+func getUptime() {
+    defer iterateInfoSliceNum()
     err, reader, file := openNewReader("/proc/uptime")
     if err != nil {
         return
@@ -108,10 +116,11 @@ func getUptime(channel chan string) {
     }
     finalTimeString = finalTimeString[:len(finalTimeString) - 2]
 
-    channel <- "Uptime: " + finalTimeString
+    infoSlice[3] = "Uptime: " + finalTimeString
 }
 
-func getKernelVersion(channel chan string) {
+func getKernelVersion() {
+    defer iterateInfoSliceNum()
     file, err := os.Open("/proc/version")
     if err != nil {
         return
@@ -128,20 +137,22 @@ func getKernelVersion(channel chan string) {
 
     versionSlice := kRegex.Find([]byte(kVersion))
 
-    channel <- "Kernel: " + string(versionSlice)
+    infoSlice[1] = "Kernel: " + string(versionSlice)
 }
 
-func getShell(channel chan string) {
+func getShell() {
+    defer iterateInfoSliceNum()
     shell := os.Getenv("SHELL")
     version, err := exec.Command(shell, "--version").Output()
     if err != nil {
-        channel <- "Shell: " + shell
+        infoSlice[2] = "Shell: " + shell
     } else {
-        channel <- "Shell: " + string(version[:len(version)-1])
+        infoSlice[2] = "Shell: " + string(version[:len(version)-1])
     }
 }
 
-func getPackages(channel chan string) {
+func getPackages() {
+    defer iterateInfoSliceNum()
     var packagesList []byte
     var numPackages int
     var packagesString string
@@ -164,38 +175,28 @@ func getPackages(channel chan string) {
         numPackages = strings.Count(string(packagesList), "\n")
         packagesString = packagesString + strconv.Itoa(numPackages) + " (dpkg) "
     }
-    channel <- "Packages: " + packagesString
+
+    if packagesString != "" {
+        infoSlice[4] = "Packages: " + packagesString
+    }
 }
 
 func main() {
-    channel := make(chan string)
-    infoSlice := make([]string, 5)
+    go getUptime()
+    go getOsName()
+    go getKernelVersion()
+    go getShell()
+    go getPackages()
 
-    go getUptime(channel)
-    go getOsName(channel)
-    go getKernelVersion(channel)
-    go getShell(channel)
-    go getPackages(channel)
-
-    for i := 0; i < 5; i++ {
-        info := <-channel
-        switch info[:2] {
-        case "OS":
-            infoSlice[0] = info
-        case "Ke":
-            infoSlice[1] = info
-        case "Sh":
-            infoSlice[2] = info
-        case "Up":
-            infoSlice[3] = info
-        case "Pa":
-            infoSlice[4] = info
-        default:
-            fmt.Println("N/A:", info)
+    for {
+        if len(infoSlice) == infoSliceIter {
+            break
         }
     }
 
     for i := 0; i < len(infoSlice); i++ {
-        fmt.Println(infoSlice[i])
+        if infoSlice[i] != "" {
+            fmt.Println(infoSlice[i])
+        }
     }
 }
