@@ -211,19 +211,10 @@ func getCpuName() {
         return
     }
 
-    // Remove consecutive spaces from CPU name
-    var newCpuName string
-    var space int
-    for i := 0; i < len(cpuName); i++ {
-        if cpuName[i] == ' ' {
-            space++
-        } else {
-            space = 0
-        }
-        if space <= 1 {
-            newCpuName += string(cpuName[i])
-        }
-    }
+    newCpuName := cpuName
+
+    // Remove double spaces from CPU name
+    newCpuName = strings.ReplaceAll(newCpuName, "  ", " ")
 
     // Remove (R) from CPU name
     newCpuName = strings.ReplaceAll(newCpuName, "(R)", "")
