@@ -189,7 +189,7 @@ func getPackages() {
         packagesString = packagesString + strconv.Itoa(numPackages) + " (pacman) "
     }
 
-    packagesList, err = exec.Command("dpkg", "--list").Output()
+    packagesList, err = exec.Command("dpkg-query", "-f", "\n", "-W").Output()
     if err == nil {
         numPackages = strings.Count(string(packagesList), "\n")
         packagesString = packagesString + strconv.Itoa(numPackages) + " (dpkg) "
