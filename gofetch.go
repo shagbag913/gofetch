@@ -124,10 +124,8 @@ func getUptime() {
 
     minutes := remainder / 60
 
-    seconds := uptime % 60
-
-    combTime := []int{years, months, days, hours, minutes, seconds}
-    combTimeString := []string{"year", "month", "day", "hour", "minute", "second"}
+    combTime := []int{years, months, days, hours, minutes}
+    combTimeString := []string{"year", "month", "day", "hour", "minute"}
 
     var finalTimeString string
 
