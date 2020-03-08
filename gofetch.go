@@ -67,8 +67,15 @@ func _getOsName() string {
 func getOsName() {
     defer iterateInfoSliceNum()
     if _getOsName() != "" {
-        infoSlice[0] = "OS: " +  colorBrightWhite + _getOsName()
+        infoSlice[0] = "OS: " +  colorBrightWhite + _getOsName() + " " + getOsVersion()
     }
+}
+
+func getOsVersion() string {
+    if isAndroidSystem() {
+        return getProp("ro.build.version.release")
+    }
+    return ""
 }
 
 func getUptime() {
