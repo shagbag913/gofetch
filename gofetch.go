@@ -200,11 +200,29 @@ func getPackages() {
     }
 }
 
-func getCpuName() {
-    defer iterateInfoSliceNum()
-
+func getCpuInfoFromProc(scanner bufio.Scanner) (string, int) {
     var coreCount int
     var cpuName string
+
+    cpuNameProcList := []string{"model name", "Hardware"}
+
+    for scanner.Scan() {
+        for i := 0; i < len(cpuNameProcList); i++ {
+            length := len(cpuNameProcList[i])
+            if len(scanner.Text()) >= length && scanner.Text()[:length] == cpuNameProcList[i] {
+                cpuName = scanner.Text()[length+3:]
+                break
+            }
+        }
+        if len(scanner.Text()) >= 9 && scanner.Text()[:9] == "processor" {
+            coreCount++
+        }
+    }
+    return cpuName, coreCount
+}
+
+func getCpuName() {
+    defer iterateInfoSliceNum()
 
     file, err := os.Open("/proc/cpuinfo")
     if err != nil {
@@ -214,31 +232,22 @@ func getCpuName() {
     defer file.Close()
 
     scanner := bufio.NewScanner(file)
+    cpuName, coreCount := getCpuInfoFromProc(*scanner)
 
-    for scanner.Scan() {
-        if len(scanner.Text()) > 9 && scanner.Text()[:10] == "model name" {
-            if coreCount == 0 {
-                cpuName = scanner.Text()[13:]
-            }
-            coreCount++
-        }
-    }
     if cpuName == "" {
         return
     }
 
-    newCpuName := cpuName
-
     // Remove double spaces from CPU name
-    newCpuName = strings.ReplaceAll(newCpuName, "  ", " ")
+    cpuName = strings.ReplaceAll(cpuName, "  ", " ")
 
     // Remove (R) from CPU name
-    newCpuName = strings.ReplaceAll(newCpuName, "(R)", "")
+    cpuName = strings.ReplaceAll(cpuName, "(R)", "")
 
     // Add core count
-    newCpuName += " (" + strconv.Itoa(coreCount) + ")"
+    cpuName += " (" + strconv.Itoa(coreCount) + ")"
 
-    infoSlice[5] = "CPU: " + colorBrightWhite + newCpuName
+    infoSlice[5] = "CPU: " + colorBrightWhite + cpuName
 }
 
 func getAsciiLogo() []string {
