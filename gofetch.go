@@ -260,7 +260,7 @@ func getAsciiLogo() []string {
 
     file, err := os.Open(asciiPath)
     if err != nil {
-        printDebug("Couldn't find ASCII for OS " + _getOsName())
+        printDebug("Couldn't find ASCII for OS " + _getOsName() + " at path " + asciiPath)
         return []string{""}
     }
     scanner := bufio.NewScanner(file)
