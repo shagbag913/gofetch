@@ -3,10 +3,12 @@ package main
 import (
     "os/exec"
     "strings"
+    "os"
 )
 
 var propNames []string
 var propKeys []string
+var isAndroid uint8
 
 func getProp(name string) string {
     // Cache prop values
@@ -42,4 +44,15 @@ func getProp(name string) string {
         }
     }
     return ""
+}
+
+func isAndroidSystem() bool {
+    if isAndroid == 0 {
+        if _, err := os.Stat("/system/priv-app"); os.IsNotExist(err) {
+            isAndroid = 1
+        } else {
+            isAndroid = 2
+        }
+    }
+    return isAndroid == 2
 }
