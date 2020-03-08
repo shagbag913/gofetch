@@ -253,6 +253,9 @@ func getCpuName() {
     // Shorten QCOM CPU/SoC name
     cpuName = strings.ReplaceAll(cpuName, "Qualcomm Technologies, Inc", "QCOM")
 
+    // Remove "CPU"
+    cpuName = strings.ReplaceAll(cpuName, " CPU ", " ")
+
     // Add core count
     cpuName += " (" + strconv.Itoa(coreCount) + ")"
 
