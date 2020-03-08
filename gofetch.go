@@ -40,6 +40,10 @@ func iterateInfoSliceNum() {
 
 func _getOsName() string {
     if osName == "" {
+        if isAndroidSystem() {
+            osName = "Android"
+            return osName
+        }
         err, reader, file := openNewReader("/etc/os-release")
         if err != nil {
             printDebug(err.Error())
