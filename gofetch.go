@@ -281,9 +281,6 @@ func main() {
     go getCpuName()
 
     var printBuffer string
-    var iter int
-
-    ascii := getAsciiLogo()
 
     for {
         if len(infoSlice) == infoSliceIter {
@@ -293,23 +290,30 @@ func main() {
 
     // Filter out empty items
     validInfos := make([]string, 0)
-    for iter = range infoSlice {
+    for iter := range infoSlice {
         if infoSlice[iter] != "" {
             validInfos = append(validInfos, infoSlice[iter])
         }
     }
 
     // Get longest ASCII line for info spacers
+    ascii := getAsciiLogo()
     var longestAsciiLine int
-    for iter = range ascii {
+    for iter := range ascii {
         if len(ascii[iter]) > longestAsciiLine {
             longestAsciiLine = len(ascii[iter])
         }
     }
     infoSpacer := longestAsciiLine + 2
 
+    asciiThreshold := -1
+    if len(ascii)+1 > len(validInfos) {
+        asciiThreshold = (len(ascii) - len(validInfos)) / 2
+    }
+
     fmt.Println("")
-    iter = 0
+    iter := 0
+    infoIter := 0
     for {
         spacer := infoSpacer
         printBuffer = "  " + colorBrightBlue
@@ -318,8 +322,9 @@ func main() {
             spacer -= len(ascii[iter])
         }
         printBuffer += strings.Repeat(" ", spacer)
-        if iter < len(validInfos) {
-            printBuffer += validInfos[iter]
+        if infoIter < len(validInfos) && iter > asciiThreshold {
+            printBuffer += validInfos[infoIter]
+            infoIter++
         }
 
         // If there's only color escape sequences and spaces then we're done here
