@@ -171,12 +171,11 @@ func getKernelVersion() {
 func getShell() {
     defer iterateInfoSliceNum()
     shell := os.Getenv("SHELL")
-    version, err := exec.Command(shell, "--version").Output()
-    if err != nil {
-        infoSlice[2] = "Shell: " + colorBrightWhite + shell
-    } else {
-        infoSlice[2] = "Shell: " + colorBrightWhite + string(version[:len(version)-1])
+    shellRegex, err := regexp.Compile(`.*/`)
+    if err == nil {
+        shell = string(shellRegex.ReplaceAllString(shell, ""))
     }
+    infoSlice[2] = "Shell: " + colorBrightWhite + shell
 }
 
 func getPackages() {
