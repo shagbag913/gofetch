@@ -11,7 +11,7 @@ import (
     "time"
 )
 
-var debug bool = true
+var debug bool
 var osName string
 var infoSlice [6]string
 var infoSliceIter int
