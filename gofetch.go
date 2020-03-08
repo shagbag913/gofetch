@@ -15,7 +15,6 @@ var debug bool = true
 var osName string
 var infoSlice [6]string
 var infoSliceIter int
-var ascii [5]string
 
 var colorBrightWhite string = "\u001b[37;1m"
 var colorBrightBlue string = "\u001b[34;1m"
@@ -252,12 +251,23 @@ func getCpuName() {
 
 func getAsciiLogo() []string {
     ascii := make([]string, 0)
+    configHome := os.Getenv("XDG_CONFIG_HOME")
+    if configHome == "" {
+        configHome = os.Getenv("HOME") + "/.config"
+    }
+    asciiFile := strings.ReplaceAll(strings.ToLower(_getOsName()), " ", "_")
+    asciiPath := configHome + "/gofetch/ascii/" + asciiFile
 
-    ascii = append(ascii, "    /\\")
-    ascii = append(ascii, "   /  \\")
-    ascii = append(ascii, "  / /\\ \\")
-    ascii = append(ascii, " / ____ \\")
-    ascii = append(ascii, "/_/    \\_\\")
+    file, err := os.Open(asciiPath)
+    if err != nil {
+        printDebug("Couldn't find ASCII for OS " + _getOsName())
+        return []string{""}
+    }
+    scanner := bufio.NewScanner(file)
+
+    for scanner.Scan() {
+        ascii = append(ascii, scanner.Text())
+    }
 
     return ascii
 }
