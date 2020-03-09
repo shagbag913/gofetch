@@ -361,23 +361,30 @@ func main() {
     }
     infoSpacer := longestAsciiLine + 2
 
-    asciiThreshold := -1
+    infoThreshold := -1
     if len(ascii)+1 > len(validInfos) {
-        asciiThreshold = (len(ascii) - len(validInfos)) / 2
+        infoThreshold = (len(ascii) - len(validInfos)) / 2
+    }
+
+    asciiThreshold := -1
+    if len(ascii) < len(validInfos)+1 {
+        asciiThreshold = (len(validInfos) - len(ascii)) / 2
     }
 
     fmt.Println("")
     iter := 0
     infoIter := 0
+    asciiIter := 0
     for {
         spacer := infoSpacer
         printBuffer = "  " + colorBrightBlue
-        if iter < len(ascii) {
-            printBuffer += ascii[iter]
-            spacer -= len(ascii[iter])
+        if asciiIter < len(ascii) && iter >= asciiThreshold {
+            printBuffer += ascii[asciiIter]
+            spacer -= len(ascii[asciiIter])
+            asciiIter++
         }
         printBuffer += strings.Repeat(" ", spacer)
-        if infoIter < len(validInfos) && iter > asciiThreshold {
+        if infoIter < len(validInfos) && iter >= infoThreshold {
             printBuffer += validInfos[infoIter]
             infoIter++
         }
