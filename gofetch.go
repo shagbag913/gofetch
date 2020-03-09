@@ -13,7 +13,7 @@ import (
 
 var debug bool
 var osName string
-var infoSlice [6]string
+var infoSlice [7]string
 var infoSliceIter int
 
 var colorBrightWhite string = "\u001b[37;1m"
@@ -285,6 +285,37 @@ func getAsciiLogo() []string {
     return ascii
 }
 
+func getMemCapacity() {
+    defer iterateInfoSliceNum()
+    err, reader, file := openNewReader("/proc/meminfo")
+    if err != nil {
+        printDebug(err.Error())
+        return
+    }
+    defer file.Close()
+
+    memTotalProc, err := reader.ReadBytes('\n')
+    if err != nil {
+        printDebug(err.Error())
+        return
+    }
+
+    memRegex, err := regexp.Compile(`[0-9]+`)
+    if err != nil {
+        printDebug(err.Error())
+        return
+    }
+    memTotal, err := strconv.Atoi(string(memRegex.Find(memTotalProc)))
+    if err != nil {
+        printDebug(err.Error())
+        return
+    }
+    memTotalMB := strconv.Itoa(memTotal / 1000)
+
+    infoSlice[6] = "Memory: " + colorBrightWhite + memTotalMB + "MB"
+}
+
+
 func main() {
     go getUptime()
     go getOsName()
@@ -292,6 +323,7 @@ func main() {
     go getShell()
     go getPackages()
     go getCpuName()
+    go getMemCapacity()
 
     var printBuffer string
 
