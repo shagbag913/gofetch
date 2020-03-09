@@ -254,7 +254,17 @@ func getCpuName() {
     cpuName = strings.ReplaceAll(cpuName, "Qualcomm Technologies, Inc", "QCOM")
 
     // Remove "CPU"
-    cpuName = strings.ReplaceAll(cpuName, " CPU ", " ")
+    cpuName = strings.ReplaceAll(cpuName, "CPU", " ")
+
+    // Remove text-based core count
+    cpuRegex, err := regexp.Compile(` [a-zA-Z]+-[cC]ore `)
+    if err == nil {
+        cpuName = cpuRegex.ReplaceAllString(cpuName, " ")
+    }
+
+    // Remove "[Pp]rocessor"
+    cpuName = strings.ReplaceAll(cpuName, "Processor", " ")
+    cpuName = strings.ReplaceAll(cpuName, "processor", " ")
 
     // Add core count
     cpuName += " (" + strconv.Itoa(coreCount) + ")"
