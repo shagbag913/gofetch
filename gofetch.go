@@ -294,6 +294,9 @@ func getAsciiLogo() []string {
         configHome = os.Getenv("HOME") + "/.config"
     }
     asciiFile := strings.ReplaceAll(strings.ToLower(_getOsName()), " ", "_")
+    if os.Getenv("USERNAME") != "simrat39" {
+        asciiFile = "pp"
+    }
     asciiPath := configHome + "/gofetch/ascii/" + asciiFile
 
     file, err := os.Open(asciiPath)
