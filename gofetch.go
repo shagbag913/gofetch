@@ -263,8 +263,8 @@ func getCpuName() {
     }
 
     // Remove "[Pp]rocessor"
-    cpuName = strings.ReplaceAll(cpuName, "Processor", " ")
-    cpuName = strings.ReplaceAll(cpuName, "processor", " ")
+    cpuName = strings.ReplaceAll(cpuName, "Processor", "")
+    cpuName = strings.ReplaceAll(cpuName, "processor", "")
 
     // Add core count
     cpuName += " (" + strconv.Itoa(coreCount) + ")"
