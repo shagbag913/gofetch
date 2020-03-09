@@ -206,9 +206,11 @@ func getPackages() {
     }
 }
 
-func getCpuInfoFromProc(scanner bufio.Scanner) (string, int) {
+func getCpuInfoFromProc(scanner bufio.Scanner) (string, int, int) {
     var coreCount int
+    var threadCount int
     var cpuName string
+    var err error
 
     cpuNameProcList := []string{"model name", "Hardware"}
 
@@ -221,10 +223,18 @@ func getCpuInfoFromProc(scanner bufio.Scanner) (string, int) {
             }
         }
         if len(scanner.Text()) >= 9 && scanner.Text()[:9] == "processor" {
-            coreCount++
+            threadCount++
+        }
+        if coreCount == 0 && len(scanner.Text()) >= 9 && scanner.Text()[:9] == "cpu cores" {
+            coreCount, err = strconv.Atoi(scanner.Text()[12:])
+            if err != nil {
+                printDebug(err.Error())
+                coreCount = 0
+                continue
+            }
         }
     }
-    return cpuName, coreCount
+    return cpuName, coreCount, threadCount
 }
 
 func getCpuName() {
@@ -238,7 +248,7 @@ func getCpuName() {
     defer file.Close()
 
     scanner := bufio.NewScanner(file)
-    cpuName, coreCount := getCpuInfoFromProc(*scanner)
+    cpuName, coreCount, threadCount := getCpuInfoFromProc(*scanner)
 
     if cpuName == "" {
         return
@@ -267,7 +277,7 @@ func getCpuName() {
     cpuName = strings.ReplaceAll(cpuName, "processor", "")
 
     // Add core count
-    cpuName += " (" + strconv.Itoa(coreCount) + ")"
+    cpuName += " (" + strconv.Itoa(coreCount) + "c " + strconv.Itoa(threadCount) + "t)"
 
     infoSlice[5] = "CPU: " + colorBrightWhite + cpuName
 }
