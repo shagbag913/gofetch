@@ -234,6 +234,9 @@ func getCpuInfoFromProc(scanner bufio.Scanner) (string, int, int) {
             }
         }
     }
+    if coreCount == 0 && threadCount > 0 {
+        coreCount = threadCount
+    }
     return cpuName, coreCount, threadCount
 }
 
