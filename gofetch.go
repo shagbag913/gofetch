@@ -3,6 +3,7 @@ package main
 import (
     "fmt"
     "os"
+    "os/user"
     "os/exec"
     "bufio"
     "regexp"
@@ -13,7 +14,7 @@ import (
 
 var debug bool
 var osName string
-var infoSlice [7]string
+var infoSlice [9]string
 var infoSliceIter int
 
 var colorBrightWhite string = "\u001b[37;1m"
@@ -67,7 +68,7 @@ func _getOsName() string {
 func getOsName() {
     defer iterateInfoSliceNum()
     if _getOsName() != "" {
-        infoSlice[0] = "OS: " +  colorBrightWhite + _getOsName() + " " + getOsVersion()
+        infoSlice[2] = "OS: " +  colorBrightWhite + _getOsName() + " " + getOsVersion()
     }
 }
 
@@ -148,7 +149,7 @@ func getUptime() {
     }
     finalTimeString = finalTimeString[:len(finalTimeString) - 2]
 
-    infoSlice[3] = "Uptime: " + colorBrightWhite + finalTimeString
+    infoSlice[5] = "Uptime: " + colorBrightWhite + finalTimeString
 }
 
 func getKernelVersion() {
@@ -169,7 +170,7 @@ func getKernelVersion() {
 
     versionSlice := kRegex.Find([]byte(kVersion))
 
-    infoSlice[1] = "Kernel: " + colorBrightWhite + string(versionSlice)
+    infoSlice[3] = "Kernel: " + colorBrightWhite + string(versionSlice)
 }
 
 func getShell() {
@@ -179,7 +180,7 @@ func getShell() {
     if err == nil {
         shell = string(shellRegex.ReplaceAllString(shell, ""))
     }
-    infoSlice[2] = "Shell: " + colorBrightWhite + shell
+    infoSlice[4] = "Shell: " + colorBrightWhite + shell
 }
 
 func getPackages() {
@@ -202,7 +203,7 @@ func getPackages() {
     }
 
     if packagesString != "" {
-        infoSlice[4] = "Packages: " + colorBrightWhite + packagesString
+        infoSlice[6] = "Packages: " + colorBrightWhite + packagesString
     }
 }
 
@@ -284,7 +285,7 @@ func getCpuName() {
     // Add core count
     cpuName += " (" + strconv.Itoa(coreCount) + "c " + strconv.Itoa(threadCount) + "t)"
 
-    infoSlice[5] = "CPU: " + colorBrightWhite + cpuName
+    infoSlice[7] = "CPU: " + colorBrightWhite + cpuName
 }
 
 func getAsciiLogo() []string {
@@ -337,9 +338,27 @@ func getMemCapacity() {
     }
     memTotalMB := strconv.Itoa(memTotal / 1000)
 
-    infoSlice[6] = "Memory: " + colorBrightWhite + memTotalMB + "MB"
+    infoSlice[8] = "Memory: " + colorBrightWhite + memTotalMB + "MB"
 }
 
+func getHostUserHeader() {
+    defer iterateInfoSliceNum()
+    defer iterateInfoSliceNum()
+    user, err := user.Current()
+    if err != nil {
+        printDebug(err.Error())
+        return
+    }
+
+    hostname, err := os.Hostname()
+    if err != nil {
+        printDebug(err.Error())
+        return
+    }
+
+    infoSlice[0] = colorBrightBlue + user.Username + colorBrightWhite + "@" + colorBrightBlue + hostname
+    infoSlice[1] = colorBrightWhite + strings.Repeat("-", len(user.Username) + len(hostname) + 1)
+}
 
 func main() {
     go getUptime()
@@ -349,6 +368,7 @@ func main() {
     go getPackages()
     go getCpuName()
     go getMemCapacity()
+    go getHostUserHeader()
 
     var printBuffer string
 
