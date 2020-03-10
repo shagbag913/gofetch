@@ -7,3 +7,5 @@ clean:
 
 install: 
 	sudo cp gofetch /usr/bin
+
+all: clean gofetch install
