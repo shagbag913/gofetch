@@ -292,7 +292,12 @@ func getAsciiLogo() []string {
     ascii := make([]string, 0)
     configHome := os.Getenv("XDG_CONFIG_HOME")
     if configHome == "" {
-        configHome = os.Getenv("HOME") + "/.config"
+        home, err := os.UserHomeDir()
+        if err != nil {
+            printDebug(err.Error())
+            return []string{""}
+        }
+        configHome = home + "/.config"
     }
     asciiFile := strings.ReplaceAll(strings.ToLower(_getOsName()), " ", "_")
     asciiPath := configHome + "/gofetch/ascii/" + asciiFile
