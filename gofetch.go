@@ -147,7 +147,12 @@ func getUptime() {
         }
         finalTimeString += ", "
     }
-    finalTimeString = finalTimeString[:len(finalTimeString) - 2]
+    if len(finalTimeString) > 0 {
+        // Remove trailing ", "
+        finalTimeString = finalTimeString[:len(finalTimeString) - 2]
+    } else {
+        finalTimeString = "0 min"
+    }
 
     infoSlice[5] = "Uptime: " + colorBrightWhite + finalTimeString
 }
