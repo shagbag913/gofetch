@@ -1,2 +1,5 @@
-# gofetch binary
-gofetch
+*
+!*.go
+!Makefile
+!ascii/
+!ascii/*
